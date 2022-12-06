@@ -23,6 +23,7 @@ if __name__ == "__main__":
     model.fit(data_original=data_train)
 
     # test data Transformation
+    feature_normal_train, _, _ = model.transform(data_train)
     feature_normal, values_normal, vector_normal = model.transform(data_test_normal)
     feature_fault, values_fault, vector_fault = model.transform(data_test_fault)
 
@@ -33,15 +34,17 @@ if __name__ == "__main__":
     diff_fault = np.array(diff_fault)
 
     # Statistics of test data
+    Te_train = np.diag(np.dot(feature_normal_train[:, :6], feature_normal_train[:, :6].transpose()))
+    Td_train = np.diag(np.dot(feature_normal_train[:, 6:], feature_normal_train[:, 6:].transpose()))
     Te_normal = np.diag(np.dot(feature_normal[:,:6],feature_normal[:,:6].transpose()))
     Td_normal = np.diag(np.dot(feature_normal[:,6:],feature_normal[:,6:].transpose()))
     Te_fault = np.diag(np.dot(feature_fault[:,:6],feature_fault[:,:6].transpose()))
     Td_fault = np.diag(np.dot(feature_fault[:,6:],feature_fault[:,6:].transpose()))
 
     # Calculating Statistical Control Limits Using KDE Nonparametric Estimation
-    zhixindu = 0.95
-    Td_kzx = find_kde(Td_normal, zhixindu)
-    Te_kzx = find_kde(Te_normal, zhixindu)
+    confidence = 0.95
+    Td_kzx = find_kde(Td_train, confidence)
+    Te_kzx = find_kde(Te_train, confidence)
 
     # Splice the normal working condition of the test data with the fault
     Td_test = np.concatenate([Td_normal,Td_fault],axis=0)
